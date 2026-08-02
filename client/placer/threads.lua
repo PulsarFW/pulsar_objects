@@ -35,7 +35,7 @@ function PlaceCast()
 			destination.y,
 			destination.z,
 			-1,
-			LocalPlayer.state.ped,
+			PlayerPedId(),
 			0
 		)
 	)
@@ -107,19 +107,17 @@ function InstructionScaleform(scaleform, showFurnitureButtons, showGizmoButtons)
 			PopScaleformMovieFunctionVoid()
 		end
 
-		if showFurnitureButtons ~= false then
-			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-			PushScaleformMovieFunctionParameterInt(2)
-			InstructionButton(GetControlInstructionalButton(0, GetHashKey("+cancel_action") | 0x80000000, 1))
-			InstructionButtonMessage(showFurnitureButtons and "Cancel" or "Cancel Placement")
-			PopScaleformMovieFunctionVoid()
-	
-			PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
-			PushScaleformMovieFunctionParameterInt(1)
-			InstructionButton(GetControlInstructionalButton(0, GetHashKey("+primary_action") | 0x80000000, 1))
-			InstructionButtonMessage(showFurnitureButtons and "Place" or "Place Object")
-			PopScaleformMovieFunctionVoid()
-		end
+		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+		PushScaleformMovieFunctionParameterInt(2)
+		InstructionButton(GetControlInstructionalButton(0, GetHashKey("+cancel_action") | 0x80000000, 1))
+		InstructionButtonMessage(showFurnitureButtons and "Cancel" or "Cancel Placement")
+		PopScaleformMovieFunctionVoid()
+
+		PushScaleformMovieFunction(scaleform, "SET_DATA_SLOT")
+		PushScaleformMovieFunctionParameterInt(1)
+		InstructionButton(GetControlInstructionalButton(0, GetHashKey("+primary_action") | 0x80000000, 1))
+		InstructionButtonMessage(showFurnitureButtons and "Place" or "Place Object")
+		PopScaleformMovieFunctionVoid()
 
 		PushScaleformMovieFunction(scaleform, "DRAW_INSTRUCTIONAL_BUTTONS")
 		PopScaleformMovieFunctionVoid()
@@ -182,7 +180,7 @@ function RunPlacementThread(
 		CreateThread(function()
 			while _placeData ~= nil and _placing do
 				if IsPedInAnyVehicle(myPed) then
-					exports['pulsar-objects']:PlacerCancel()
+					plsr.ObjectPlacer:Cancel()
 				end
 
 				local instructions = InstructionScaleform("instructional_buttons", showFurnitureButtons)
@@ -222,7 +220,7 @@ function RunPlacementThread(
 					and #(coords - myPos) <= _maxDist
 					and (
 						canPlaceInside == true
-						or (canPlaceInside == 2 and not LocalPlayer.state.tpLocation)
+						or (canPlaceInside == 2 and not plsr.State.flags.tpLocation)
 						or (GetInteriorFromEntity(myPed) == 0 and GetInteriorFromEntity(obj) == 0)
 					)
 
@@ -246,12 +244,12 @@ function RunPlacementThread(
 		end)
 	else
 		EnterCursorMode()
-		exports["pulsar-objects"]:prepareGizmo(obj)
+		exports["pulsar_objects"]:prepareGizmo(obj)
 
 		CreateThread(function()
 			while _placeData ~= nil and _placing do
 				if IsPedInAnyVehicle(myPed) then
-					exports['pulsar-objects']:PlacerCancel()
+					plsr.ObjectPlacer:Cancel()
 				end
 
 				local instructions = InstructionScaleform("instructional_buttons", showFurnitureButtons, true)
@@ -260,21 +258,21 @@ function RunPlacementThread(
 
 				if IsDisabledControlJustReleased(0, 36) then -- INPUT_DUCK
 					SetEntityRotation(obj, 0.0, 0.0, 0.0)
-					exports["pulsar-objects"]:prepareGizmo(obj)
+					exports["pulsar_objects"]:prepareGizmo(obj)
 				elseif IsDisabledControlJustReleased(0, 21) then -- INPUT_SPRINT
 					PlaceObjectOnGroundProperly(obj)
-					exports["pulsar-objects"]:prepareGizmo(obj)
+					exports["pulsar_objects"]:prepareGizmo(obj)
 				end
 
 				myPos = GetEntityCoords(myPed)
 				if not _gizmoCam then
-					exports["pulsar-objects"]:drawGizmo(obj)
+					exports["pulsar_objects"]:drawGizmo(obj)
 				end
 
 				isValid = #(GetEntityCoords(obj) - myPos) <= _maxDist
 					and (
 						canPlaceInside == true
-						or (canPlaceInside == 2 and not LocalPlayer.state.tpLocation)
+						or (canPlaceInside == 2 and not plsr.State.flags.tpLocation)
 						or (GetInteriorFromEntity(myPed) == 0 and GetInteriorFromEntity(obj) == 0)
 					)
 
@@ -319,23 +317,23 @@ end)
 RegisterCommand("-gizmoCameraToggle", function() end)
 
 function DisableControls()
-	DisableControlAction(0, 30, true)  -- disable left/right
-	DisableControlAction(0, 31, true)  -- disable forward/back
-	DisableControlAction(0, 36, true)  -- INPUT_DUCK
-	DisableControlAction(0, 21, true)  -- disable sprint
-	DisableControlAction(0, 26, true)  -- look behind
-	DisableControlAction(0, 44, true)  -- disable cover
-	DisableControlAction(0, 63, true)  -- veh turn left
-	DisableControlAction(0, 64, true)  -- veh turn right
-	DisableControlAction(0, 71, true)  -- veh forward
-	DisableControlAction(0, 72, true)  -- veh backwards
-	DisableControlAction(0, 75, true)  -- disable exit vehicle
+	DisableControlAction(0, 30, true) -- disable left/right
+	DisableControlAction(0, 31, true) -- disable forward/back
+	DisableControlAction(0, 36, true) -- INPUT_DUCK
+	DisableControlAction(0, 21, true) -- disable sprint
+	DisableControlAction(0, 26, true) -- look behind
+	DisableControlAction(0, 44, true) -- disable cover
+	DisableControlAction(0, 63, true) -- veh turn left
+	DisableControlAction(0, 64, true) -- veh turn right
+	DisableControlAction(0, 71, true) -- veh forward
+	DisableControlAction(0, 72, true) -- veh backwards
+	DisableControlAction(0, 75, true) -- disable exit vehicle
 	DisablePlayerFiring(PlayerId(), true) -- Disable weapon firing
-	DisableControlAction(0, 24, true)  -- disable attack
-	DisableControlAction(0, 25, true)  -- disable aim
-	DisableControlAction(1, 37, true)  -- disable weapon select
-	DisableControlAction(0, 47, true)  -- disable weapon
-	DisableControlAction(0, 58, true)  -- disable weapon
+	DisableControlAction(0, 24, true) -- disable attack
+	DisableControlAction(0, 25, true) -- disable aim
+	DisableControlAction(1, 37, true) -- disable weapon select
+	DisableControlAction(0, 47, true) -- disable weapon
+	DisableControlAction(0, 58, true) -- disable weapon
 	DisableControlAction(0, 140, true) -- disable melee
 	DisableControlAction(0, 141, true) -- disable melee
 	DisableControlAction(0, 142, true) -- disable melee

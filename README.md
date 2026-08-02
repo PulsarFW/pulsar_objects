@@ -6,13 +6,18 @@
 
 # PULSAR-OBJECTS
 
-### Persistent world object placement and management
+### Persisted world objects — in-game placement (gizmo editor + ghost preview) with DB-backed storage
 
 <br/>
 
 ![Lua](https://img.shields.io/badge/Lua_5.4-2C2D72?style=flat-square&logo=lua&logoColor=white)
 ![FiveM](https://img.shields.io/badge/FiveM-F40552?style=flat-square)
-![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=flat-square&logo=mariadb)
+
+<br/>
+
+<sub>Enjoy the framework? A coffee helps keep active development, hardening, and support going.</sub>
+
+<a href="https://buymeacoffee.com/pulsarframework"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 50px !important;width: 180px !important;" /></a>
 
 <br/>
 
@@ -24,20 +29,21 @@
 
 ## Overview
 
-Persistent object placement system for Pulsar Framework. Allows players and admins to place, move, rotate, and persist world objects across server restarts with database-backed storage.
+Registers `plsr.Objects`. Lets an admin place, position (via an in-game gizmo), and persist world props to the database — placement uses a ghost/preview object before committing.
 
 ---
 
 ## Dependencies
 
-- `pulsar-core` — framework core
-- `oxmysql` — database layer
+- `pulsar_core` — framework core
+- `pulsar_pwnzor` — anti-cheat check loaded alongside every resource
+- `oxmysql` — external resource, not part of Pulsar — direct MariaDB access for persisted object storage
 
 ---
 
 ## License
 
-This resource is proprietary software. All rights reserved by the Pulsar Framework team. Unauthorized distribution or resale is prohibited.
+This resource is free to use and modify under the [Pulsar Framework License](LICENSE.md). Redistribution is welcome as long as it stays free — selling this resource or any derivative of it requires written permission from the Pulsar Framework team.
 
 ---
 
