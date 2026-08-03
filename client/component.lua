@@ -159,7 +159,7 @@ AddEventHandler("Objects:Client:ViewData", function(entity, data)
 end)
 
 AddEventHandler("Objects:Client:OpenInventory", function(entity, data)
-	plsr.Inventory.Dumbfuck:Open({
+	plsr.Inventory.Secondary:Open({
 		invType = 138,
 		owner = Entity(entity.entity).state.objectId,
 	})
